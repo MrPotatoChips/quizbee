@@ -14,6 +14,7 @@ export default defineEventHandler(async (event) => {
 
   // Find user
   const user = getUserByUsername(username)
+  // NOTE: In production, use secure password comparison (e.g., bcrypt.compare)
   if (!user || user.password !== password) {
     throw createError({
       statusCode: 401,

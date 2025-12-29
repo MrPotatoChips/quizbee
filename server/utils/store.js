@@ -9,13 +9,17 @@ const store = {
   answers: new Map(), // answerId -> answer object
 }
 
+// Scoring constants
+const BASE_SCORE = 500
+const MAX_SPEED_BONUS = 500
+
 // User management
 export function createUser(userData) {
-  const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  const userId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`
   const user = {
     id: userId,
     username: userData.username,
-    password: userData.password, // In production, hash this
+    password: userData.password, // NOTE: In production, this should be hashed using bcrypt or similar
     role: userData.role || 'user',
     createdAt: new Date().toISOString()
   }
@@ -42,7 +46,7 @@ export function getAllUsers() {
 
 // Session management
 export function createSession(userId) {
-  const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  const sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`
   store.sessions.set(sessionId, userId)
   return sessionId
 }
@@ -58,7 +62,7 @@ export function deleteSession(sessionId) {
 
 // Room management
 export function createRoom(roomData, adminId) {
-  const roomId = `room_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  const roomId = `room_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`
   const room = {
     id: roomId,
     name: roomData.name,
@@ -118,7 +122,7 @@ export function getRoomParticipants(roomId) {
 
 // Quiz management
 export function createQuiz(quizData, roomId) {
-  const quizId = `quiz_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  const quizId = `quiz_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`
   const quiz = {
     id: quizId,
     roomId: roomId,
@@ -150,7 +154,7 @@ export function updateQuiz(quizId, quizData) {
 
 // Quiz session management (for live quizzes)
 export function createQuizSession(quizId, roomId) {
-  const sessionId = `qsession_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  const sessionId = `qsession_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`
   const session = {
     id: sessionId,
     quizId: quizId,
@@ -198,8 +202,8 @@ export function submitAnswer(sessionId, userId, questionIndex, answer, isCorrect
   if (isCorrect) {
     const currentScore = session.participants.get(userId) || 0
     // Score based on correctness and speed (max 1000 points per question)
-    const speedBonus = Math.max(0, 500 - timeTaken)
-    const score = 500 + speedBonus
+    const speedBonus = Math.max(0, MAX_SPEED_BONUS - timeTaken)
+    const score = BASE_SCORE + speedBonus
     session.participants.set(userId, currentScore + score)
   }
 
