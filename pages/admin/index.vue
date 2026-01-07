@@ -81,7 +81,7 @@
           <div class="py-6">
             <div v-if="selectedRoom">
               <div class="mb-6">
-                <UButton @click="selectedTab = 'rooms'; selectedRoom = null" icon="i-heroicons-arrow-left" variant="ghost">
+                <UButton @click="selectedTab = 1; selectedRoom = null" icon="i-heroicons-arrow-left" variant="ghost">
                   Back to Rooms
                 </UButton>
               </div>
@@ -274,7 +274,7 @@ definePageMeta({
 const { user, sessionId, logout } = useAuth()
 const router = useRouter()
 
-const selectedTab = ref('users')
+const selectedTab = ref(0)
 const tabs = [
   { key: 'users', label: 'Users', slot: 'users' },
   { key: 'rooms', label: 'Rooms', slot: 'rooms' },
@@ -406,7 +406,7 @@ const handleCreateRoom = async () => {
 const manageRoom = async (room) => {
   selectedRoom.value = room
   tabs[2].disabled = false
-  selectedTab.value = 'manage'
+  selectedTab.value = 2
   await loadQuizzes(room.id)
 }
 

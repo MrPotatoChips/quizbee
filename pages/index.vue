@@ -61,7 +61,7 @@
 const { login, register, user } = useAuth()
 const router = useRouter()
 
-const selectedTab = ref('login')
+const selectedTab = ref(0)
 const tabs = [
   { key: 'login', label: 'Login', slot: 'login' },
   { key: 'register', label: 'Register', slot: 'register' }
