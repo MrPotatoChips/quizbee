@@ -9,47 +9,47 @@
       </template>
 
       <UTabs v-model="selectedTab" :items="tabs" class="w-full">
-        <template #default="{ item }">
+        <template #login>
           <div class="py-4">
-            <div v-if="item.key === 'login'">
-              <form @submit.prevent="handleLogin" class="space-y-4">
-                <UFormGroup label="Username" required>
-                  <UInput v-model="loginForm.username" placeholder="Enter username" />
-                </UFormGroup>
-                
-                <UFormGroup label="Password" required>
-                  <UInput v-model="loginForm.password" type="password" placeholder="Enter password" />
-                </UFormGroup>
+            <form @submit.prevent="handleLogin" class="space-y-4">
+              <UFormGroup label="Username" required>
+                <UInput v-model="loginForm.username" placeholder="Enter username" />
+              </UFormGroup>
+              
+              <UFormGroup label="Password" required>
+                <UInput v-model="loginForm.password" type="password" placeholder="Enter password" />
+              </UFormGroup>
 
-                <UAlert v-if="error" color="red" variant="soft" :title="error" class="mb-4" />
+              <UAlert v-if="error" color="red" variant="soft" :title="error" class="mb-4" />
 
-                <UButton type="submit" block :loading="loading">Login</UButton>
-              </form>
-            </div>
+              <UButton type="submit" block :loading="loading">Login</UButton>
+            </form>
+          </div>
+        </template>
 
-            <div v-else-if="item.key === 'register'">
-              <form @submit.prevent="handleRegister" class="space-y-4">
-                <UFormGroup label="Username" required>
-                  <UInput v-model="registerForm.username" placeholder="Enter username" />
-                </UFormGroup>
-                
-                <UFormGroup label="Password" required>
-                  <UInput v-model="registerForm.password" type="password" placeholder="Enter password" />
-                </UFormGroup>
+        <template #register>
+          <div class="py-4">
+            <form @submit.prevent="handleRegister" class="space-y-4">
+              <UFormGroup label="Username" required>
+                <UInput v-model="registerForm.username" placeholder="Enter username" />
+              </UFormGroup>
+              
+              <UFormGroup label="Password" required>
+                <UInput v-model="registerForm.password" type="password" placeholder="Enter password" />
+              </UFormGroup>
 
-                <UFormGroup label="Role" required>
-                  <USelect 
-                    v-model="registerForm.role" 
-                    :options="roleOptions"
-                    option-attribute="label"
-                  />
-                </UFormGroup>
+              <UFormGroup label="Role" required>
+                <USelect 
+                  v-model="registerForm.role" 
+                  :options="roleOptions"
+                  option-attribute="label"
+                />
+              </UFormGroup>
 
-                <UAlert v-if="error" color="red" variant="soft" :title="error" class="mb-4" />
+              <UAlert v-if="error" color="red" variant="soft" :title="error" class="mb-4" />
 
-                <UButton type="submit" block :loading="loading">Register</UButton>
-              </form>
-            </div>
+              <UButton type="submit" block :loading="loading">Register</UButton>
+            </form>
           </div>
         </template>
       </UTabs>
@@ -61,10 +61,10 @@
 const { login, register, user } = useAuth()
 const router = useRouter()
 
-const selectedTab = ref('login')
+const selectedTab = ref(0)
 const tabs = [
-  { key: 'login', label: 'Login' },
-  { key: 'register', label: 'Register' }
+  { key: 'login', label: 'Login', slot: 'login' },
+  { key: 'register', label: 'Register', slot: 'register' }
 ]
 
 const loginForm = ref({

@@ -14,73 +14,74 @@
 
     <div class="container mx-auto px-4 py-8">
       <UTabs v-model="selectedTab" :items="tabs">
-        <template #default="{ item }">
+        <template #users>
           <div class="py-6">
-            <!-- Users Tab -->
-            <div v-if="item.key === 'users'">
-              <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-semibold">Users</h2>
-                <UButton @click="showRegisterModal = true" icon="i-heroicons-plus">Register User</UButton>
+            <div class="flex justify-between items-center mb-6">
+              <h2 class="text-xl font-semibold">Users</h2>
+              <UButton @click="showRegisterModal = true" icon="i-heroicons-plus">Register User</UButton>
+            </div>
+            
+            <UCard>
+              <div v-if="loadingUsers" class="text-center py-8">
+                <p class="text-gray-500">Loading users...</p>
               </div>
-              
-              <UCard>
-                <div v-if="loadingUsers" class="text-center py-8">
-                  <p class="text-gray-500">Loading users...</p>
-                </div>
-                <div v-else-if="users.length === 0" class="text-center py-8">
-                  <p class="text-gray-500">No users found</p>
-                </div>
-                <div v-else>
-                  <div class="divide-y">
-                    <div v-for="u in users" :key="u.id" class="py-3 flex justify-between items-center">
-                      <div>
-                        <p class="font-medium">{{ u.username }}</p>
-                        <p class="text-sm text-gray-500">{{ u.role }}</p>
-                      </div>
-                      <UBadge :color="u.role === 'admin' ? 'red' : 'blue'">{{ u.role }}</UBadge>
+              <div v-else-if="users.length === 0" class="text-center py-8">
+                <p class="text-gray-500">No users found</p>
+              </div>
+              <div v-else>
+                <div class="divide-y">
+                  <div v-for="u in users" :key="u.id" class="py-3 flex justify-between items-center">
+                    <div>
+                      <p class="font-medium">{{ u.username }}</p>
+                      <p class="text-sm text-gray-500">{{ u.role }}</p>
                     </div>
+                    <UBadge :color="u.role === 'admin' ? 'red' : 'blue'">{{ u.role }}</UBadge>
+                  </div>
+                </div>
+              </div>
+            </UCard>
+          </div>
+        </template>
+
+        <template #rooms>
+          <div class="py-6">
+            <div class="flex justify-between items-center mb-6">
+              <h2 class="text-xl font-semibold">My Rooms</h2>
+              <UButton @click="showRoomModal = true" icon="i-heroicons-plus">Create Room</UButton>
+            </div>
+
+            <div v-if="loadingRooms" class="text-center py-8">
+              <p class="text-gray-500">Loading rooms...</p>
+            </div>
+            <div v-else-if="rooms.length === 0" class="text-center py-8">
+              <UCard>
+                <p class="text-gray-500">No rooms created yet</p>
+              </UCard>
+            </div>
+            <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <UCard v-for="room in rooms" :key="room.id" class="cursor-pointer hover:shadow-lg transition-shadow">
+                <div class="space-y-3">
+                  <div>
+                    <h3 class="font-semibold text-lg">{{ room.name }}</h3>
+                    <p class="text-sm text-gray-600">{{ room.description }}</p>
+                  </div>
+                  <div class="flex items-center gap-2 text-sm text-gray-500">
+                    <span>👥 {{ room.invitedUsers.length }} invited</span>
+                  </div>
+                  <div class="flex gap-2">
+                    <UButton @click="manageRoom(room)" size="sm" block>Manage</UButton>
                   </div>
                 </div>
               </UCard>
             </div>
+          </div>
+        </template>
 
-            <!-- Rooms Tab -->
-            <div v-if="item.key === 'rooms'">
-              <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-semibold">My Rooms</h2>
-                <UButton @click="showRoomModal = true" icon="i-heroicons-plus">Create Room</UButton>
-              </div>
-
-              <div v-if="loadingRooms" class="text-center py-8">
-                <p class="text-gray-500">Loading rooms...</p>
-              </div>
-              <div v-else-if="rooms.length === 0" class="text-center py-8">
-                <UCard>
-                  <p class="text-gray-500">No rooms created yet</p>
-                </UCard>
-              </div>
-              <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <UCard v-for="room in rooms" :key="room.id" class="cursor-pointer hover:shadow-lg transition-shadow">
-                  <div class="space-y-3">
-                    <div>
-                      <h3 class="font-semibold text-lg">{{ room.name }}</h3>
-                      <p class="text-sm text-gray-600">{{ room.description }}</p>
-                    </div>
-                    <div class="flex items-center gap-2 text-sm text-gray-500">
-                      <span>👥 {{ room.invitedUsers.length }} invited</span>
-                    </div>
-                    <div class="flex gap-2">
-                      <UButton @click="manageRoom(room)" size="sm" block>Manage</UButton>
-                    </div>
-                  </div>
-                </UCard>
-              </div>
-            </div>
-
-            <!-- Room Management -->
-            <div v-if="item.key === 'manage' && selectedRoom">
+        <template #manage>
+          <div class="py-6">
+            <div v-if="selectedRoom">
               <div class="mb-6">
-                <UButton @click="selectedTab = 'rooms'; selectedRoom = null" icon="i-heroicons-arrow-left" variant="ghost">
+                <UButton @click="selectedTab = 1; selectedRoom = null" icon="i-heroicons-arrow-left" variant="ghost">
                   Back to Rooms
                 </UButton>
               </div>
@@ -273,11 +274,11 @@ definePageMeta({
 const { user, sessionId, logout } = useAuth()
 const router = useRouter()
 
-const selectedTab = ref('users')
+const selectedTab = ref(0)
 const tabs = [
-  { key: 'users', label: 'Users' },
-  { key: 'rooms', label: 'Rooms' },
-  { key: 'manage', label: 'Manage Room', disabled: true }
+  { key: 'users', label: 'Users', slot: 'users' },
+  { key: 'rooms', label: 'Rooms', slot: 'rooms' },
+  { key: 'manage', label: 'Manage Room', slot: 'manage', disabled: true }
 ]
 
 const users = ref([])
@@ -405,7 +406,7 @@ const handleCreateRoom = async () => {
 const manageRoom = async (room) => {
   selectedRoom.value = room
   tabs[2].disabled = false
-  selectedTab.value = 'manage'
+  selectedTab.value = 2
   await loadQuizzes(room.id)
 }
 
