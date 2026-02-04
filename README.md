@@ -33,7 +33,7 @@ A real-time multiplayer quiz platform built with Nuxt 3, Socket.IO, and Nuxt UI.
 ## Getting Started
 
 ### Prerequisites
-- Node.js 16+ 
+- Node.js 18.x LTS (recommended)
 - npm or yarn
 
 ### Installation
@@ -65,6 +65,11 @@ If you want to deploy from a Git repo, use one of the following:
 
 > **Note about GitHub Pages:** GitHub Pages is static hosting only. It will not support the Socket.IO server or real-time
 > features. You could run `npm run generate` for a static build, but real-time quizzes will not function.
+
+### Node version note
+
+This project is tested with Node.js 18.x LTS. If your CI/CD or hosting platform defaults to Node 20.x and fails during
+install or build, set the runtime to Node 18.x. No `webpack-cli` install is required for Nuxt 3 builds. 
 
 ## Usage Guide
 
