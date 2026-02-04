@@ -1,59 +1,91 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-techy-blue to-forest-green flex items-center justify-center p-4">
-    <UCard class="w-full max-w-md">
-      <template #header>
-        <div class="text-center">
-          <h1 class="text-3xl font-bold text-gray-900">🐝 Quizbee</h1>
-          <p class="text-gray-600 mt-2">Real-time Quiz Platform</p>
+    <div class="w-full max-w-5xl grid gap-6 lg:grid-cols-[1.1fr_0.9fr] items-center">
+      <div class="text-white space-y-6">
+        <div class="space-y-3">
+          <p class="uppercase tracking-[0.3em] text-xs text-cloud-white/80">Live. Fast. Competitive.</p>
+          <h1 class="text-4xl md:text-5xl font-bold">🐝 Quizbee brings the buzz to every quiz.</h1>
+          <p class="text-cloud-white/90 text-lg">
+            Host real-time competitions, watch scores soar instantly, and keep your crew engaged with
+            lightning-fast questions and live leaderboards.
+          </p>
         </div>
-      </template>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div class="rounded-2xl bg-white/10 p-4 backdrop-blur border border-white/20">
+            <p class="text-sm text-cloud-white/70">Live momentum</p>
+            <p class="text-2xl font-semibold">⚡ Instant scoring</p>
+          </div>
+          <div class="rounded-2xl bg-white/10 p-4 backdrop-blur border border-white/20">
+            <p class="text-sm text-cloud-white/70">Room-ready</p>
+            <p class="text-2xl font-semibold">🎯 Team battles</p>
+          </div>
+          <div class="rounded-2xl bg-white/10 p-4 backdrop-blur border border-white/20">
+            <p class="text-sm text-cloud-white/70">Live insights</p>
+            <p class="text-2xl font-semibold">📊 Leaderboards</p>
+          </div>
+          <div class="rounded-2xl bg-white/10 p-4 backdrop-blur border border-white/20">
+            <p class="text-sm text-cloud-white/70">Fast setup</p>
+            <p class="text-2xl font-semibold">🧩 Simple onboarding</p>
+          </div>
+        </div>
+      </div>
 
-      <UTabs v-model="selectedTab" :items="tabs" class="w-full">
-        <template #login>
-          <div class="py-4">
-            <form @submit.prevent="handleLogin" class="space-y-4">
-              <UFormGroup label="Username" required>
-                <UInput v-model="loginForm.username" placeholder="Enter username" />
-              </UFormGroup>
-              
-              <UFormGroup label="Password" required>
-                <UInput v-model="loginForm.password" type="password" placeholder="Enter password" />
-              </UFormGroup>
-
-              <UAlert v-if="error" color="red" variant="soft" :title="error" class="mb-4" />
-
-              <UButton type="submit" block :loading="loading">Login</UButton>
-            </form>
+      <UCard class="w-full max-w-md justify-self-center">
+        <template #header>
+          <div class="text-center">
+            <h2 class="text-3xl font-bold text-gray-900">Get started</h2>
+            <p class="text-gray-600 mt-2">Join the next live quiz in seconds.</p>
           </div>
         </template>
 
-        <template #register>
-          <div class="py-4">
-            <form @submit.prevent="handleRegister" class="space-y-4">
-              <UFormGroup label="Username" required>
-                <UInput v-model="registerForm.username" placeholder="Enter username" />
-              </UFormGroup>
-              
-              <UFormGroup label="Password" required>
-                <UInput v-model="registerForm.password" type="password" placeholder="Enter password" />
-              </UFormGroup>
+        <UTabs v-model="selectedTab" :items="tabs" class="w-full">
+          <template #login>
+            <div class="py-4">
+              <form @submit.prevent="handleLogin" class="space-y-4">
+                <UFormGroup label="Username" required>
+                  <UInput v-model="loginForm.username" placeholder="Enter username" />
+                </UFormGroup>
+                
+                <UFormGroup label="Password" required>
+                  <UInput v-model="loginForm.password" type="password" placeholder="Enter password" />
+                </UFormGroup>
 
-              <UFormGroup label="Role" required>
-                <USelect 
-                  v-model="registerForm.role" 
-                  :options="roleOptions"
-                  option-attribute="label"
-                />
-              </UFormGroup>
+                <UAlert v-if="error" color="red" variant="soft" :title="error" class="mb-4" />
 
-              <UAlert v-if="error" color="red" variant="soft" :title="error" class="mb-4" />
+                <UButton type="submit" block :loading="loading">Login</UButton>
+              </form>
+            </div>
+          </template>
 
-              <UButton type="submit" block :loading="loading">Register</UButton>
-            </form>
-          </div>
-        </template>
-      </UTabs>
-    </UCard>
+          <template #register>
+            <div class="py-4">
+              <form @submit.prevent="handleRegister" class="space-y-4">
+                <UFormGroup label="Username" required>
+                  <UInput v-model="registerForm.username" placeholder="Enter username" />
+                </UFormGroup>
+                
+                <UFormGroup label="Password" required>
+                  <UInput v-model="registerForm.password" type="password" placeholder="Enter password" />
+                </UFormGroup>
+
+                <UFormGroup label="Role" required>
+                  <USelect 
+                    v-model="registerForm.role" 
+                    :options="roleOptions"
+                    option-attribute="label"
+                  />
+                  <p class="text-xs text-gray-500 mt-2">{{ activeRoleCopy }}</p>
+                </UFormGroup>
+
+                <UAlert v-if="error" color="red" variant="soft" :title="error" class="mb-4" />
+
+                <UButton type="submit" block :loading="loading">Register</UButton>
+              </form>
+            </div>
+          </template>
+        </UTabs>
+      </UCard>
+    </div>
   </div>
 </template>
 
@@ -82,6 +114,13 @@ const roleOptions = [
   { value: 'user', label: 'User' },
   { value: 'admin', label: 'Admin' }
 ]
+
+const roleCopy = {
+  user: 'Join quizzes, answer fast, and climb the leaderboard.',
+  admin: 'Build rooms, launch quizzes, and monitor live results.'
+}
+
+const activeRoleCopy = computed(() => roleCopy[registerForm.value.role])
 
 const loading = ref(false)
 const error = ref(null)

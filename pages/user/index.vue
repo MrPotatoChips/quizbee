@@ -13,8 +13,17 @@
     </div>
 
     <div class="container mx-auto px-4 py-8">
-      <div class="mb-8">
-        <h2 class="text-xl font-semibold mb-4">Room Invitations</h2>
+      <div class="mb-8 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h2 class="text-xl font-semibold mb-1">Room Invitations</h2>
+          <p class="text-sm text-gray-500">Jump into live rooms and start scoring points fast.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <UButton color="gray" variant="soft" icon="i-heroicons-arrow-path" @click="loadRooms">
+            Refresh
+          </UButton>
+          <UBadge color="primary" variant="soft">{{ rooms.length }} invites</UBadge>
+        </div>
         
         <div v-if="loadingRooms" class="text-center py-8">
           <p class="text-gray-500">Loading invitations...</p>
@@ -24,7 +33,8 @@
           <UCard>
             <div class="py-8">
               <p class="text-gray-500 mb-2">No room invitations yet</p>
-              <p class="text-sm text-gray-400">Wait for an admin to invite you to a room</p>
+              <p class="text-sm text-gray-400">Ask an admin to invite you or refresh to check again.</p>
+              <UButton class="mt-4" color="primary" variant="soft" @click="loadRooms">Check again</UButton>
             </div>
           </UCard>
         </div>
@@ -33,7 +43,7 @@
           <UCard 
             v-for="room in rooms" 
             :key="room.id" 
-            class="cursor-pointer hover:shadow-lg transition-shadow"
+            class="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1"
           >
             <div class="space-y-3">
               <div>
