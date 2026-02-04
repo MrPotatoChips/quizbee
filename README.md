@@ -54,6 +54,18 @@ npm run preview
 
 The application will be available at `http://localhost:3000`
 
+## Deployment (Git hosting)
+
+Quizbee runs a Nuxt 3 server plus Socket.IO, so it needs a Node server or a serverless platform that supports WebSockets.
+If you want to deploy from a Git repo, use one of the following:
+
+- **Vercel / Netlify / Render / Railway**: Connect your Git repository and set the build command to `npm run build` with
+  the start command `npm run preview` (or a custom Node start command). Ensure WebSocket support is enabled.
+- **Self-hosted Node server**: Run `npm run build` and `npm run preview` behind a reverse proxy such as Nginx.
+
+> **Note about GitHub Pages:** GitHub Pages is static hosting only. It will not support the Socket.IO server or real-time
+> features. You could run `npm run generate` for a static build, but real-time quizzes will not function.
+
 ## Usage Guide
 
 ### For Administrators
