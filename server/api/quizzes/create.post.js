@@ -1,4 +1,4 @@
-import { createQuiz, getUserBySession, getRoom } from '~/server/utils/store'
+import { createQuiz, getUserBySession, getRoom } from '../../utils/store'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)

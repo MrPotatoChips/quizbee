@@ -1,4 +1,4 @@
-import { getQuizzesByRoom, getUserBySession } from '~/server/utils/store'
+import { getQuizzesByRoom, getUserBySession } from '../../utils/store'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)

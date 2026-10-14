@@ -1,4 +1,4 @@
-import { getUserByUsername, createSession } from '~/server/utils/store'
+import { getUserByUsername, createSession } from '../../utils/store'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)

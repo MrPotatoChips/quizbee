@@ -11,12 +11,13 @@
   },
   "devDependencies": {
     "@nuxt/devtools": "latest",
-    "@nuxt/ui": "^2.15.0",
+    "@nuxt/ui": "^4.11.3",
     "@nuxtjs/tailwindcss": "^6.11.4",
-    "nuxt": "^3.11.2"
+    "nuxt": "^4.6.1"
   },
   "dependencies": {
     "socket.io": "^4.7.5",
-    "socket.io-client": "^4.7.5"
+    "socket.io-client": "^4.7.5",
+    "tailwindcss": "^4.3.3"
   }
 }

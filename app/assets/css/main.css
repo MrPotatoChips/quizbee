@@ -1,0 +1,9 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+@theme static {
+  --color-farm-green: #58dc00;
+  --color-techy-blue: #00a5fe;
+  --color-forest-green: #005032;
+  --color-cloud-white: #f9f8f1;
+}

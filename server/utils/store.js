@@ -6,6 +6,7 @@ const store = {
   sessions: new Map(), // sessionId -> userId
   roomParticipants: new Map(), // roomId -> Set of userIds
   quizSessions: new Map(), // quizSessionId -> quiz session data
+  activeRoomSessions: new Map(), // roomId -> quizSessionId
   answers: new Map(), // answerId -> answer object
 }
 
@@ -118,6 +119,24 @@ export function leaveRoom(roomId, userId) {
 export function getRoomParticipants(roomId) {
   const participants = store.roomParticipants.get(roomId)
   return participants ? Array.from(participants) : []
+}
+
+export function setActiveRoomSession(roomId, sessionId) {
+  store.activeRoomSessions.set(roomId, sessionId)
+}
+
+export function getActiveRoomSession(roomId) {
+  const sessionId = store.activeRoomSessions.get(roomId)
+  return sessionId ? store.quizSessions.get(sessionId) : null
+}
+
+export function ensureQuizParticipant(sessionId, userId) {
+  const session = store.quizSessions.get(sessionId)
+  if (!session || !userId) return null
+  if (!session.participants.has(userId)) {
+    session.participants.set(userId, 0)
+  }
+  return session
 }
 
 // Quiz management

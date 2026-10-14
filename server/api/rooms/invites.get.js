@@ -1,4 +1,4 @@
-import { getRoomsByUser, getUserBySession } from '~/server/utils/store'
+import { getRoomsByUser, getUserBySession } from '../../utils/store'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)

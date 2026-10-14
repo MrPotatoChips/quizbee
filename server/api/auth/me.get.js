@@ -1,4 +1,4 @@
-import { getUserBySession } from '~/server/utils/store'
+import { getUserBySession } from '../../utils/store'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)

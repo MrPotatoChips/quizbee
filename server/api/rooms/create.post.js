@@ -1,4 +1,4 @@
-import { createRoom, getUserBySession } from '~/server/utils/store'
+import { createRoom, getUserBySession } from '../../utils/store'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)

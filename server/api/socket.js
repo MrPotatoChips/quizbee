@@ -1,7 +1,7 @@
 import { Server as SocketIOServer } from 'socket.io'
-import { 
-  joinRoom, 
-  leaveRoom, 
+import {
+  joinRoom,
+  leaveRoom,
   getRoomParticipants,
   createQuizSession,
   getQuizSession,
@@ -9,8 +9,42 @@ import {
   submitAnswer,
   getLeaderboard,
   getQuiz,
-  getUserById
-} from '~/server/utils/store'
+  getUserById,
+  setActiveRoomSession,
+  getActiveRoomSession,
+  ensureQuizParticipant
+} from '../utils/store'
+
+function publicQuestion(question, index) {
+  return {
+    index,
+    question: question.question,
+    options: question.options,
+    timeLimit: question.timeLimit || 30
+  }
+}
+
+function emitQuizState(socket, roomId) {
+  const session = getActiveRoomSession(roomId)
+  if (!session) return
+
+  const quiz = getQuiz(session.quizId)
+  if (!quiz) return
+
+  const questionIndex = Math.min(session.currentQuestionIndex, Math.max(quiz.questions.length - 1, 0))
+  const question = quiz.questions[questionIndex]
+
+  socket.emit('quiz-state', {
+    status: session.status,
+    sessionId: session.id,
+    quizId: session.quizId,
+    question: question ? publicQuestion(question, questionIndex) : null,
+    questionNumber: questionIndex + 1,
+    totalQuestions: quiz.questions.length,
+    participants: getRoomParticipants(roomId).length,
+    leaderboard: session.status === 'completed' ? getLeaderboard(session.id) : []
+  })
+}
 
 let io
 
@@ -29,38 +63,48 @@ export default defineEventHandler((event) => {
 
       // Join room
       socket.on('join-room', (data) => {
-        const { roomId, userId } = data
+        const { roomId, userId, observe } = data || {}
+        if (!roomId) return
+
         socket.join(roomId)
         socket.userId = userId
         socket.roomId = roomId
-        
-        joinRoom(roomId, userId)
+        socket.observe = Boolean(observe)
+
+        if (!observe && userId) {
+          joinRoom(roomId, userId)
+          const session = getActiveRoomSession(roomId)
+          if (session && session.status === 'active') {
+            ensureQuizParticipant(session.id, userId)
+          }
+        }
+
         const participants = getRoomParticipants(roomId)
-        
-        console.log(`User ${userId} joined room ${roomId}`)
-        
-        // Notify room of new participant
+        console.log(`User ${userId || 'observer'} joined room ${roomId}`)
+
         io.to(roomId).emit('room-update', {
           participants: participants.length,
-          newUser: userId
+          newUser: observe ? null : userId
         })
+
+        emitQuizState(socket, roomId)
       })
 
       // Leave room
       socket.on('leave-room', (roomId) => {
-        if (socket.userId) {
-          leaveRoom(roomId, socket.userId)
-          const participants = getRoomParticipants(roomId)
-          
-          socket.leave(roomId)
-          console.log(`User ${socket.userId} left room ${roomId}`)
-          
-          // Notify room
-          io.to(roomId).emit('room-update', {
-            participants: participants.length,
-            leftUser: socket.userId
-          })
+        const targetRoom = roomId || socket.roomId
+        if (!targetRoom) return
+
+        if (socket.userId && !socket.observe) {
+          leaveRoom(targetRoom, socket.userId)
         }
+
+        socket.leave(targetRoom)
+        const participants = getRoomParticipants(targetRoom)
+        io.to(targetRoom).emit('room-update', {
+          participants: participants.length,
+          leftUser: socket.observe ? null : socket.userId
+        })
       })
 
       // Start quiz session
@@ -70,6 +114,11 @@ export default defineEventHandler((event) => {
         const quiz = getQuiz(quizId)
         if (!quiz) {
           socket.emit('error', { message: 'Quiz not found' })
+          return
+        }
+
+        if (!quiz.questions.length) {
+          socket.emit('error', { message: 'Quiz has no questions' })
           return
         }
 
@@ -83,15 +132,24 @@ export default defineEventHandler((event) => {
         
         updateQuizSession(session.id, { 
           status: 'active',
+          currentQuestionIndex: 0,
           startedAt: new Date().toISOString()
         })
+        setActiveRoomSession(roomId, session.id)
 
         console.log(`Quiz ${quizId} started in room ${roomId}, session: ${session.id}`)
         
-        // Broadcast quiz start to all participants
+        // Broadcast quiz start and the first question together
         io.to(roomId).emit('quiz-started', {
           sessionId: session.id,
           quizId: quizId,
+          totalQuestions: quiz.questions.length
+        })
+
+        io.to(roomId).emit('new-question', {
+          sessionId: session.id,
+          question: publicQuestion(quiz.questions[0], 0),
+          questionNumber: 1,
           totalQuestions: quiz.questions.length
         })
       })
@@ -132,20 +190,12 @@ export default defineEventHandler((event) => {
           })
         } else {
           const question = quiz.questions[questionIndex]
-          
-          // Send question without correct answer to participants
-          const questionForParticipants = {
-            index: questionIndex,
-            question: question.question,
-            options: question.options,
-            timeLimit: question.timeLimit || 30
-          }
-          
+
           console.log(`Broadcasting question ${questionIndex} for session ${sessionId}`)
-          
+
           io.to(session.roomId).emit('new-question', {
             sessionId,
-            question: questionForParticipants,
+            question: publicQuestion(question, questionIndex),
             questionNumber: questionIndex + 1,
             totalQuestions: quiz.questions.length
           })
@@ -169,7 +219,18 @@ export default defineEventHandler((event) => {
         }
 
         const question = quiz.questions[questionIndex]
-        const isCorrect = answer === question.correctAnswer
+        if (!question) {
+          socket.emit('error', { message: 'Question not found' })
+          return
+        }
+
+        const alreadyAnswered = session.answers.get(socket.userId)?.has(questionIndex)
+        if (alreadyAnswered) {
+          return
+        }
+
+        ensureQuizParticipant(sessionId, socket.userId)
+        const isCorrect = Boolean(answer) && answer === question.correctAnswer
 
         submitAnswer(sessionId, socket.userId, questionIndex, answer, isCorrect, timeTaken)
 
@@ -204,10 +265,10 @@ export default defineEventHandler((event) => {
       })
 
       socket.on('disconnect', () => {
-        if (socket.userId && socket.roomId) {
+        if (socket.userId && socket.roomId && !socket.observe) {
           leaveRoom(socket.roomId, socket.userId)
           const participants = getRoomParticipants(socket.roomId)
-          
+
           io.to(socket.roomId).emit('room-update', {
             participants: participants.length,
             leftUser: socket.userId
